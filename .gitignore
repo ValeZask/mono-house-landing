@@ -36,3 +36,6 @@ dist-ssr
 
 # Vite cache
 .vite/
+
+*.js
+tsconfig.tsbuildinfo
