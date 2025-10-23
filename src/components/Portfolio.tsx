@@ -372,8 +372,11 @@ export function Portfolio() {
             {/* Close Button - минималистичная и стильная */}
             <button
               onClick={(e) => handleFullscreenClick(e, 'close')}
-              className="absolute top-20 right-6 z-50 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 backdrop-blur-md border border-white/20"
-              style={{ touchAction: 'manipulation' }}
+              className="absolute right-6 z-50 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 backdrop-blur-md border border-white/20"
+              style={{ 
+                touchAction: 'manipulation',
+                top: isMobile ? '98px' : '80px' // Для мобильного 100px, для десктопа 80px
+              }}
               aria-label="Закрыть"
             >
               <X size={20} color="white" strokeWidth={2} />
@@ -386,7 +389,8 @@ export function Portfolio() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="relative w-full h-full flex items-center justify-center p-4"
+              className="relative w-full h-full flex items-center justify-center"
+              style={{ paddingTop: '80px', paddingBottom: '16px', paddingLeft: '16px', paddingRight: '16px' }}
               onTouchStart={isMobile ? handleFullscreenTouchStart : undefined}
               onTouchEnd={isMobile ? handleFullscreenTouchEnd : undefined}
             >
