@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
@@ -216,7 +216,7 @@ export function Portfolio() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl sm:text-5xl md:text-6xl mb-4" style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}>
+          <h2 className="text-3xl sm:text-4xl mb-4" style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}>
             Наши работы
           </h2>
         </motion.div>

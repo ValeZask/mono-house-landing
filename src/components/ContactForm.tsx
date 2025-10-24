@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -63,7 +63,7 @@ export function ContactForm() {
           className="text-center mb-12"
         >
           <h2
-            className="text-4xl sm:text-5xl md:text-6xl mb-4"
+            className="text-3xl sm:text-4xl mb-4"
             style={{ color: 'var(--color-gold)', fontFamily: 'Playfair Display, serif' }}
           >
             Оставьте заявку

@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Instagram, Facebook, MessageCircle } from 'lucide-react';
 
 export function Footer() {

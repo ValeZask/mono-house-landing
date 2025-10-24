@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -45,31 +45,26 @@ export function Navigation() {
       }`}
       style={{
         zIndex: 9999,
-        backgroundColor: 'var(--color-light-bg)',
+        backgroundColor: 'rgba(253,247,240,0.9)',
         backdropFilter: 'blur(8px)',
         pointerEvents: 'auto',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-14 sm:h-16">
-{/* Лого + надпись */}
-<button
-  onClick={() => scrollToSection('#hero')}
-  className="flex items-center space-x-2 transition-colors"
-  style={{ padding: 0, border: 'none', background: 'transparent' }}
->
-  <img
-    src="/images/logo1.png"
-    alt="Mono House"
-    className="h-10 sm:h-12" // размер логотипа
-  />
-  <span
-    className="text-2xl tracking-wide"
-    style={{ color: '#000000', fontFamily: 'Playfair Display, serif' }}
-  >
-    Mono House
-  </span>
-</button>
+        <div className="flex justify-between items-center h-12 sm:h-16">
+          {/* Надпись Mono House */}
+          <button
+            onClick={() => scrollToSection('#hero')}
+            className="transition-colors"
+            style={{ padding: 0, border: 'none', background: 'transparent' }}
+          >
+            <span
+              className="text-2xl tracking-wide"
+              style={{ color: '#000000', fontFamily: 'Playfair Display, serif' }}
+            >
+              Mono House
+            </span>
+          </button>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-8">
