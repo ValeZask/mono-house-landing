@@ -115,7 +115,7 @@ export function Footer() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="pt-8 border-t text-center text-white/50"
+          className="pt-17 border-t text-center text-white/50"
           style={{ borderColor: 'rgba(212, 175, 55, 0.2)' }}
         >
           <p>© 2025 Mono House. Все права защищены</p>
