@@ -38,19 +38,12 @@ export function Portfolio() {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefetchedPagesRef = useRef<Set<number>>(new Set());
 
-  // Функция prefetch следующей страницы
   const prefetchNextPage = (pageNumber: number) => {
     const totalPages = Math.ceil(portfolioImages.length / ITEMS_PER_PAGE);
-    
-    // Если страница уже prefetch'илась, пропускаем
-    if (prefetchedPagesRef.current.has(pageNumber) || pageNumber > totalPages) {
-      return;
-    }
-
+    if (prefetchedPagesRef.current.has(pageNumber) || pageNumber > totalPages) return;
     const startIdx = (pageNumber - 1) * ITEMS_PER_PAGE;
     const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, portfolioImages.length);
     const nextPageImages = portfolioImages.slice(startIdx, endIdx);
-
     nextPageImages.forEach(img => {
       const link = document.createElement('link');
       link.rel = 'prefetch';
@@ -58,21 +51,14 @@ export function Portfolio() {
       link.href = img.url;
       document.head.appendChild(link);
     });
-
     prefetchedPagesRef.current.add(pageNumber);
   };
 
-  // Prefetch следующей страницы при монтировании и смене currentPage
   useEffect(() => {
-    // Небольшая задержка, чтобы не мешать загрузке текущей страницы
-    const timer = setTimeout(() => {
-      prefetchNextPage(currentPage + 1);
-    }, 500);
-
+    const timer = setTimeout(() => prefetchNextPage(currentPage + 1), 500);
     return () => clearTimeout(timer);
   }, [currentPage]);
 
-  // Определяем мобильное устройство
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -80,68 +66,42 @@ export function Portfolio() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Автоплей слайдера на мобильном
+  // ---- Исправленный автоплей ----
   useEffect(() => {
     if (!isMobile || isFullscreen) return;
     const interval = setInterval(() => {
       const timeSinceLastInteraction = Date.now() - lastInteractionTime;
-      if (timeSinceLastInteraction > 15000) setIsAutoPlaying(true);
-
-      if (isAutoPlaying) {
-        handleSlideChange(currentSlide + 1, 'left');
-      }
-    }, 4000);
-
+      if (timeSinceLastInteraction > 7000) setIsAutoPlaying(true);
+      if (isAutoPlaying) handleSlideChange(currentSlide + 1, 'left', true);
+    }, 3000);
     return () => clearInterval(interval);
   }, [isMobile, isAutoPlaying, lastInteractionTime, currentSlide, isFullscreen]);
+  // -------------------------------
 
-  // Блокируем скролл когда открыт fullscreen
   useEffect(() => {
-    if (isFullscreen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
+    document.body.style.overflow = isFullscreen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
   }, [isFullscreen]);
 
-  // Закрытие по Escape и навигация стрелками
   useEffect(() => {
     const handleKeyboard = (e: KeyboardEvent) => {
       if (!isFullscreen) return;
-      
-      if (e.key === 'Escape') {
-        setIsFullscreen(false);
-      } else if (e.key === 'ArrowLeft') {
-        handleFullscreenNav('prev');
-      } else if (e.key === 'ArrowRight') {
-        handleFullscreenNav('next');
-      }
+      if (e.key === 'Escape') setIsFullscreen(false);
+      else if (e.key === 'ArrowLeft') handleFullscreenNav('prev');
+      else if (e.key === 'ArrowRight') handleFullscreenNav('next');
     };
     window.addEventListener('keydown', handleKeyboard);
     return () => window.removeEventListener('keydown', handleKeyboard);
   }, [isFullscreen, fullscreenIndex]);
 
-  // Обработка кнопки "Назад" на мобильных устройствах
   useEffect(() => {
     if (!isFullscreen) return;
-
-    const handlePopState = () => {
-      setIsFullscreen(false);
-    };
-
-    // Добавляем запись в историю браузера при открытии fullscreen
+    const handlePopState = () => setIsFullscreen(false);
     window.history.pushState({ fullscreen: true }, '');
     window.addEventListener('popstate', handlePopState);
-
     return () => {
       window.removeEventListener('popstate', handlePopState);
-      // Удаляем запись из истории при закрытии
-      if (window.history.state?.fullscreen) {
-        window.history.back();
-      }
+      if (window.history.state?.fullscreen) window.history.back();
     };
   }, [isFullscreen]);
 
@@ -150,19 +110,20 @@ export function Portfolio() {
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const currentImages = portfolioImages.slice(startIndex, endIndex);
 
-  // Управление слайдом
-  const handleSlideChange = (newSlide: number, direction: 'left' | 'right') => {
+  // ---- Исправленная функция ----
+  const handleSlideChange = (newSlide: number, direction: 'left' | 'right', fromAuto = false) => {
     if (!isMobile) return;
-    setIsAutoPlaying(false);
+    if (!fromAuto) {
+      setIsAutoPlaying(false);
+      setLastInteractionTime(Date.now());
+    }
     setSlideDirection(direction);
-    setLastInteractionTime(Date.now());
-
     if (newSlide < 0) setCurrentSlide(portfolioImages.length - 1);
     else if (newSlide >= portfolioImages.length) setCurrentSlide(0);
     else setCurrentSlide(newSlide);
   };
+  // ------------------------------
 
-  // Touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
     setTouchDelta(0);
@@ -180,65 +141,42 @@ export function Portfolio() {
     if (touchStart === null) return;
     setIsDragging(false);
     const swipeThreshold = 50;
-
     if (touchDelta > swipeThreshold) handleSlideChange(currentSlide - 1, 'right');
     else if (touchDelta < -swipeThreshold) handleSlideChange(currentSlide + 1, 'left');
-
     setTouchStart(null);
     setTouchDelta(0);
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const openFullscreen = (index: number) => {
-    setFullscreenIndex(index);
-    setIsFullscreen(true);
-  };
-
-  const closeFullscreen = () => {
-    setIsFullscreen(false);
-  };
+  const handlePageChange = (page: number) => setCurrentPage(page);
+  const openFullscreen = (index: number) => { setFullscreenIndex(index); setIsFullscreen(true); };
+  const closeFullscreen = () => setIsFullscreen(false);
 
   const handleFullscreenNav = (direction: 'prev' | 'next') => {
-    if (direction === 'prev') {
-      setFullscreenIndex((prev) => (prev === 0 ? portfolioImages.length - 1 : prev - 1));
-    } else {
-      setFullscreenIndex((prev) => (prev === portfolioImages.length - 1 ? 0 : prev + 1));
-    }
+    if (direction === 'prev')
+      setFullscreenIndex(prev => (prev === 0 ? portfolioImages.length - 1 : prev - 1));
+    else
+      setFullscreenIndex(prev => (prev === portfolioImages.length - 1 ? 0 : prev + 1));
   };
 
-  // Touch handlers для fullscreen на мобильном
   const handleFullscreenTouchStart = (e: React.TouchEvent) => {
     setFullscreenTouchStart(e.targetTouches[0].clientX);
   };
 
   const handleFullscreenTouchEnd = (e: React.TouchEvent) => {
     if (fullscreenTouchStart === null) return;
-    
     const touchEnd = e.changedTouches[0].clientX;
     const diff = fullscreenTouchStart - touchEnd;
     const swipeThreshold = 50;
-
-    if (diff > swipeThreshold) {
-      handleFullscreenNav('next');
-    } else if (diff < -swipeThreshold) {
-      handleFullscreenNav('prev');
-    }
-
+    if (diff > swipeThreshold) handleFullscreenNav('next');
+    else if (diff < -swipeThreshold) handleFullscreenNav('prev');
     setFullscreenTouchStart(null);
   };
 
   const handleFullscreenClick = (e: React.MouseEvent, area: 'left' | 'right' | 'close') => {
     e.stopPropagation();
-    if (area === 'close') {
-      setIsFullscreen(false);
-    } else if (area === 'left') {
-      handleFullscreenNav('prev');
-    } else {
-      handleFullscreenNav('next');
-    }
+    if (area === 'close') closeFullscreen();
+    else if (area === 'left') handleFullscreenNav('prev');
+    else handleFullscreenNav('next');
   };
 
   return (
@@ -258,13 +196,10 @@ export function Portfolio() {
 
         {!isMobile ? (
           <>
-            {/* Desktop Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {currentImages.map((image, index) => {
                 const globalIndex = startIndex + index;
-                // Первые 6 картинок (1 страница) грузятся сразу без lazy
                 const shouldLazyLoad = currentPage > 1;
-                
                 return (
                   <motion.div
                     key={`${currentPage}-${index}`}
@@ -274,11 +209,11 @@ export function Portfolio() {
                     className="group relative overflow-hidden rounded-lg aspect-[4/3] bg-white shadow-md cursor-pointer"
                     onClick={() => openFullscreen(startIndex + index)}
                   >
-                    <ImageWithFallback 
-                      src={image.url} 
-                      alt={`Проект ${globalIndex + 1}`} 
+                    <ImageWithFallback
+                      src={image.url}
+                      alt={`Проект ${globalIndex + 1}`}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading={shouldLazyLoad ? "lazy" : undefined}
+                      loading={shouldLazyLoad ? 'lazy' : undefined}
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
                   </motion.div>
@@ -286,7 +221,6 @@ export function Portfolio() {
               })}
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -304,7 +238,7 @@ export function Portfolio() {
                 </button>
 
                 <div className="flex gap-2">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
@@ -333,7 +267,6 @@ export function Portfolio() {
             )}
           </>
         ) : (
-          /* Mobile Slider */
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -356,30 +289,12 @@ export function Portfolio() {
                   className="w-full h-full object-cover"
                   draggable={false}
                 />
-
-                {/* Click zones */}
-                <button
-                  onClick={() => handleSlideChange(currentSlide - 1, 'right')}
-                  className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
-                  style={{ background: 'transparent' }}
-                  aria-label="Предыдущий слайд"
-                />
-                <button
-                  onClick={() => openFullscreen(currentSlide)}
-                  className="absolute left-1/3 top-0 bottom-0 w-1/3 cursor-pointer z-10"
-                  style={{ background: 'transparent' }}
-                  aria-label="Открыть на весь экран"
-                />
-                <button
-                  onClick={() => handleSlideChange(currentSlide + 1, 'left')}
-                  className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-10"
-                  style={{ background: 'transparent' }}
-                  aria-label="Следующий слайд"
-                />
+                <button onClick={() => handleSlideChange(currentSlide - 1, 'right')} className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-10" />
+                <button onClick={() => openFullscreen(currentSlide)} className="absolute left-1/3 top-0 bottom-0 w-1/3 cursor-pointer z-10" />
+                <button onClick={() => handleSlideChange(currentSlide + 1, 'left')} className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-10" />
               </div>
             </div>
 
-            {/* Dots */}
             <div className="flex justify-center gap-2 mt-6">
               {portfolioImages.map((_, index) => (
                 <button
@@ -400,7 +315,6 @@ export function Portfolio() {
         )}
       </div>
 
-      {/* Fullscreen Modal */}
       <AnimatePresence>
         {isFullscreen && (
           <motion.div
@@ -409,22 +323,16 @@ export function Portfolio() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-50 bg-black flex items-center justify-center"
-            onClick={(e) => handleFullscreenClick(e, 'close')}
+            onClick={e => handleFullscreenClick(e, 'close')}
           >
-            {/* Close Button */}
             <button
-              onClick={(e) => handleFullscreenClick(e, 'close')}
+              onClick={e => handleFullscreenClick(e, 'close')}
               className="absolute right-6 z-50 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 backdrop-blur-md border border-white/20"
-              style={{ 
-                touchAction: 'manipulation',
-                top: isMobile ? '98px' : '80px'
-              }}
-              aria-label="Закрыть"
+              style={{ touchAction: 'manipulation', top: isMobile ? '98px' : '80px' }}
             >
               <X size={20} color="white" strokeWidth={2} />
             </button>
 
-            {/* Image Container */}
             <motion.div
               key={fullscreenIndex}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -441,21 +349,12 @@ export function Portfolio() {
                 alt={`Проект ${fullscreenIndex + 1}`}
                 className="max-w-full max-h-full object-contain select-none"
                 draggable={false}
-                onClick={(e) => e.stopPropagation()}
+                onClick={e => e.stopPropagation()}
               />
-              
-              {/* Click zones */}
-              <div
-                className="absolute left-0 top-0 bottom-0 w-1/3 z-10 cursor-pointer"
-                onClick={(e) => handleFullscreenClick(e, 'left')}
-              />
-              <div
-                className="absolute right-0 top-0 bottom-0 w-1/3 z-10 cursor-pointer"
-                onClick={(e) => handleFullscreenClick(e, 'right')}
-              />
+              <div className="absolute left-0 top-0 bottom-0 w-1/3 z-10 cursor-pointer" onClick={e => handleFullscreenClick(e, 'left')} />
+              <div className="absolute right-0 top-0 bottom-0 w-1/3 z-10 cursor-pointer" onClick={e => handleFullscreenClick(e, 'right')} />
             </motion.div>
 
-            {/* Counter */}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-lg font-semibold bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full z-40">
               {fullscreenIndex + 1} / {portfolioImages.length}
             </div>
