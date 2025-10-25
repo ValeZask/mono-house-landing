@@ -36,23 +36,41 @@ export function Portfolio() {
   const [fullscreenTouchStart, setFullscreenTouchStart] = useState<number | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const prefetchedPagesRef = useRef<Set<number>>(new Set());
 
-  // Prefetch остальных картинок после загрузки первых 6
+  // Функция prefetch следующей страницы
+  const prefetchNextPage = (pageNumber: number) => {
+    const totalPages = Math.ceil(portfolioImages.length / ITEMS_PER_PAGE);
+    
+    // Если страница уже prefetch'илась, пропускаем
+    if (prefetchedPagesRef.current.has(pageNumber) || pageNumber > totalPages) {
+      return;
+    }
+
+    const startIdx = (pageNumber - 1) * ITEMS_PER_PAGE;
+    const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, portfolioImages.length);
+    const nextPageImages = portfolioImages.slice(startIdx, endIdx);
+
+    nextPageImages.forEach(img => {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.as = 'image';
+      link.href = img.url;
+      document.head.appendChild(link);
+    });
+
+    prefetchedPagesRef.current.add(pageNumber);
+  };
+
+  // Prefetch следующей страницы при монтировании и смене currentPage
   useEffect(() => {
-    const prefetchImages = () => {
-      portfolioImages.slice(ITEMS_PER_PAGE).forEach(img => {
-        const link = document.createElement('link');
-        link.rel = 'prefetch';
-        link.as = 'image';
-        link.href = img.url;
-        document.head.appendChild(link);
-      });
-    };
+    // Небольшая задержка, чтобы не мешать загрузке текущей страницы
+    const timer = setTimeout(() => {
+      prefetchNextPage(currentPage + 1);
+    }, 500);
 
-    // Запускаем prefetch через 1 секунду после монтирования
-    const timer = setTimeout(prefetchImages, 1000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [currentPage]);
 
   // Определяем мобильное устройство
   useEffect(() => {
@@ -244,8 +262,8 @@ export function Portfolio() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {currentImages.map((image, index) => {
                 const globalIndex = startIndex + index;
-                // Первые 6 картинок грузятся сразу, остальные lazy
-                const shouldLazyLoad = globalIndex >= ITEMS_PER_PAGE;
+                // Первые 6 картинок (1 страница) грузятся сразу без lazy
+                const shouldLazyLoad = currentPage > 1;
                 
                 return (
                   <motion.div
