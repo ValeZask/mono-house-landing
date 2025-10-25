@@ -6,7 +6,7 @@ export function Hero() {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-center bg-cover"
       style={{
-        backgroundImage: "url('/images/hero04.jpg')",
+        backgroundImage: "url('/images/hero04.webp')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}

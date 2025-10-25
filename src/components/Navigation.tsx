@@ -45,7 +45,7 @@ export function Navigation() {
       }`}
       style={{
         zIndex: 9999,
-        backgroundColor: 'rgba(253,247,240,0.9)',
+        backgroundColor: 'var(--color-light-bg)',
         backdropFilter: 'blur(8px)',
         pointerEvents: 'auto',
       }}

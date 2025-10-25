@@ -4,19 +4,19 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 const portfolioImages = [
-  { url: '/images/portfolio-1.jpg' },
-  { url: '/images/portfolio-2.jpg' },
-  { url: '/images/portfolio-3.jpg' },
-  { url: '/images/portfolio-4.jpg' },
-  { url: '/images/portfolio-5.jpg' },
-  { url: '/images/portfolio-6.jpg' },
-  { url: '/images/portfolio-9.jpg' },
-  { url: '/images/portfolio-7.jpg' },
-  { url: '/images/portfolio-8.jpg' },
-  { url: '/images/portfolio-10.jpg' },
-  { url: '/images/portfolio-11.jpg' },
-  { url: '/images/portfolio-12.jpg' },
-  { url: '/images/portfolio-13.jpg' },
+  { url: '/images/portfolio-1.webp' },
+  { url: '/images/portfolio-2.webp' },
+  { url: '/images/portfolio-3.webp' },
+  { url: '/images/portfolio-4.webp' },
+  { url: '/images/portfolio-5.webp' },
+  { url: '/images/portfolio-6.webp' },
+  { url: '/images/portfolio-9.webp' },
+  { url: '/images/portfolio-7.webp' },
+  { url: '/images/portfolio-8.webp' },
+  { url: '/images/portfolio-10.webp' },
+  { url: '/images/portfolio-11.webp' },
+  { url: '/images/portfolio-12.webp' },
+  { url: '/images/portfolio-13.webp' },
 ];
 
 const ITEMS_PER_PAGE = 6;
@@ -36,6 +36,23 @@ export function Portfolio() {
   const [fullscreenTouchStart, setFullscreenTouchStart] = useState<number | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Prefetch остальных картинок после загрузки первых 6
+  useEffect(() => {
+    const prefetchImages = () => {
+      portfolioImages.slice(ITEMS_PER_PAGE).forEach(img => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.as = 'image';
+        link.href = img.url;
+        document.head.appendChild(link);
+      });
+    };
+
+    // Запускаем prefetch через 1 секунду после монтирования
+    const timer = setTimeout(prefetchImages, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Определяем мобильное устройство
   useEffect(() => {
@@ -225,23 +242,30 @@ export function Portfolio() {
           <>
             {/* Desktop Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {currentImages.map((image, index) => (
-                <motion.div
-                  key={`${currentPage}-${index}`}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="group relative overflow-hidden rounded-lg aspect-[4/3] bg-white shadow-md cursor-pointer"
-                  onClick={() => openFullscreen(startIndex + index)}
-                >
-                  <ImageWithFallback 
-                    src={image.url} 
-                    alt={`Проект ${startIndex + index + 1}`} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
-                </motion.div>
-              ))}
+              {currentImages.map((image, index) => {
+                const globalIndex = startIndex + index;
+                // Первые 6 картинок грузятся сразу, остальные lazy
+                const shouldLazyLoad = globalIndex >= ITEMS_PER_PAGE;
+                
+                return (
+                  <motion.div
+                    key={`${currentPage}-${index}`}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    className="group relative overflow-hidden rounded-lg aspect-[4/3] bg-white shadow-md cursor-pointer"
+                    onClick={() => openFullscreen(startIndex + index)}
+                  >
+                    <ImageWithFallback 
+                      src={image.url} 
+                      alt={`Проект ${globalIndex + 1}`} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading={shouldLazyLoad ? "lazy" : undefined}
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
+                  </motion.div>
+                );
+              })}
             </div>
 
             {/* Pagination */}
@@ -369,13 +393,13 @@ export function Portfolio() {
             className="fixed inset-0 z-50 bg-black flex items-center justify-center"
             onClick={(e) => handleFullscreenClick(e, 'close')}
           >
-            {/* Close Button - минималистичная и стильная */}
+            {/* Close Button */}
             <button
               onClick={(e) => handleFullscreenClick(e, 'close')}
               className="absolute right-6 z-50 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 backdrop-blur-md border border-white/20"
               style={{ 
                 touchAction: 'manipulation',
-                top: isMobile ? '98px' : '80px' // Для мобильного 100px, для десктопа 80px
+                top: isMobile ? '98px' : '80px'
               }}
               aria-label="Закрыть"
             >
@@ -402,7 +426,7 @@ export function Portfolio() {
                 onClick={(e) => e.stopPropagation()}
               />
               
-              {/* Click zones - для всех устройств */}
+              {/* Click zones */}
               <div
                 className="absolute left-0 top-0 bottom-0 w-1/3 z-10 cursor-pointer"
                 onClick={(e) => handleFullscreenClick(e, 'left')}

@@ -120,7 +120,7 @@ export function Partnership() {
             className="relative overflow-hidden rounded-lg shadow-2xl h-64 sm:h-80 md:h-96 lg:h-auto"
           >
             <ImageWithFallback
-              src="/images/nills.jpg"
+              src="/images/nills.webp"
               alt="Nills company building"
               className="w-full h-full object-cover"
             />
