@@ -39,3 +39,7 @@ dist-ssr
 
 *.js
 tsconfig.tsbuildinfo
+
+# Environment variables
+.env.local
+.env*.local

@@ -2,26 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-
-const portfolioImages = [
-  { url: '/images/portfolio-1.webp' },
-  { url: '/images/portfolio-2.webp' },
-  { url: '/images/portfolio-3.webp' },
-  { url: '/images/portfolio-4.webp' },
-  { url: '/images/portfolio-5.webp' },
-  { url: '/images/portfolio-6.webp' },
-  { url: '/images/portfolio-9.webp' },
-  { url: '/images/portfolio-7.webp' },
-  { url: '/images/portfolio-8.webp' },
-  { url: '/images/portfolio-10.webp' },
-  { url: '/images/portfolio-11.webp' },
-  { url: '/images/portfolio-12.webp' },
-  { url: '/images/portfolio-13.webp' },
-];
+import { supabase, PortfolioImage } from '../lib/supabase';
 
 const ITEMS_PER_PAGE = 6;
 
 export function Portfolio() {
+  const [portfolioImages, setPortfolioImages] = useState<PortfolioImage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -38,6 +25,43 @@ export function Portfolio() {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefetchedPagesRef = useRef<Set<number>>(new Set());
 
+  // Загружаем изображения из Supabase
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('portfolio_images')
+          .select('*')
+          .order('display_order', { ascending: true });
+
+        if (error) throw error;
+        setPortfolioImages(data || []);
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchImages();
+
+    // Подписываемся на изменения в реальном времени
+    const subscription = supabase
+      .channel('portfolio_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'portfolio_images' },
+        () => {
+          fetchImages();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const prefetchNextPage = (pageNumber: number) => {
     const totalPages = Math.ceil(portfolioImages.length / ITEMS_PER_PAGE);
     if (prefetchedPagesRef.current.has(pageNumber) || pageNumber > totalPages) return;
@@ -48,7 +72,7 @@ export function Portfolio() {
       const link = document.createElement('link');
       link.rel = 'prefetch';
       link.as = 'image';
-      link.href = img.url;
+      link.href = img.image_url;
       document.head.appendChild(link);
     });
     prefetchedPagesRef.current.add(pageNumber);
@@ -57,7 +81,7 @@ export function Portfolio() {
   useEffect(() => {
     const timer = setTimeout(() => prefetchNextPage(currentPage + 1), 500);
     return () => clearTimeout(timer);
-  }, [currentPage]);
+  }, [currentPage, portfolioImages]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -66,17 +90,15 @@ export function Portfolio() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // ---- Исправленный автоплей ----
   useEffect(() => {
-    if (!isMobile || isFullscreen) return;
+    if (!isMobile || isFullscreen || portfolioImages.length === 0) return;
     const interval = setInterval(() => {
       const timeSinceLastInteraction = Date.now() - lastInteractionTime;
       if (timeSinceLastInteraction > 7000) setIsAutoPlaying(true);
       if (isAutoPlaying) handleSlideChange(currentSlide + 1, 'left', true);
     }, 3000);
     return () => clearInterval(interval);
-  }, [isMobile, isAutoPlaying, lastInteractionTime, currentSlide, isFullscreen]);
-  // -------------------------------
+  }, [isMobile, isAutoPlaying, lastInteractionTime, currentSlide, isFullscreen, portfolioImages.length]);
 
   useEffect(() => {
     document.body.style.overflow = isFullscreen ? 'hidden' : '';
@@ -105,12 +127,49 @@ export function Portfolio() {
     };
   }, [isFullscreen]);
 
+  // Показываем загрузку
+  if (loading) {
+    return (
+      <section id="portfolio" className="py-20 sm:py-32" style={{ backgroundColor: 'var(--color-light-bg)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl mb-4" style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}>
+              Наши работы
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="aspect-[4/3] bg-gray-200 animate-pulse rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Если нет изображений
+  if (portfolioImages.length === 0) {
+    return (
+      <section id="portfolio" className="py-20 sm:py-32" style={{ backgroundColor: 'var(--color-light-bg)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl mb-4" style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}>
+              Наши работы
+            </h2>
+          </div>
+          <div className="text-center py-12">
+            <p className="text-gray-500">Портфолио скоро появится</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   const totalPages = Math.ceil(portfolioImages.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const currentImages = portfolioImages.slice(startIndex, endIndex);
 
-  // ---- Исправленная функция ----
   const handleSlideChange = (newSlide: number, direction: 'left' | 'right', fromAuto = false) => {
     if (!isMobile) return;
     if (!fromAuto) {
@@ -122,7 +181,6 @@ export function Portfolio() {
     else if (newSlide >= portfolioImages.length) setCurrentSlide(0);
     else setCurrentSlide(newSlide);
   };
-  // ------------------------------
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
@@ -202,7 +260,7 @@ export function Portfolio() {
                 const shouldLazyLoad = currentPage > 1;
                 return (
                   <motion.div
-                    key={`${currentPage}-${index}`}
+                    key={image.id}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -210,7 +268,7 @@ export function Portfolio() {
                     onClick={() => openFullscreen(startIndex + index)}
                   >
                     <ImageWithFallback
-                      src={image.url}
+                      src={image.image_url}
                       alt={`Проект ${globalIndex + 1}`}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       loading={shouldLazyLoad ? 'lazy' : undefined}
@@ -284,7 +342,7 @@ export function Portfolio() {
             >
               <div className="relative aspect-[4/3] bg-white">
                 <ImageWithFallback
-                  src={portfolioImages[currentSlide].url}
+                  src={portfolioImages[currentSlide].image_url}
                   alt={`Проект ${currentSlide + 1}`}
                   className="w-full h-full object-cover"
                   draggable={false}
@@ -345,7 +403,7 @@ export function Portfolio() {
               onTouchEnd={isMobile ? handleFullscreenTouchEnd : undefined}
             >
               <img
-                src={portfolioImages[fullscreenIndex].url}
+                src={portfolioImages[fullscreenIndex].image_url}
                 alt={`Проект ${fullscreenIndex + 1}`}
                 className="max-w-full max-h-full object-contain select-none"
                 draggable={false}
