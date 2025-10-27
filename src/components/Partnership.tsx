@@ -66,7 +66,7 @@ export function Partnership() {
           <div className="h-px w-16" style={{ backgroundColor: 'var(--color-gold)' }} />
         </div>
 
-        {/* Информация о партнерстве с Nills */}
+        {/* Информация о Nills */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -74,7 +74,7 @@ export function Partnership() {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-            {/* Текст о партнерстве */}
+            {/* Текст о Nills */}
             <div className="lg:col-span-2 space-y-4">
               <p
                 className="text-xs tracking-widest uppercase"
@@ -82,7 +82,7 @@ export function Partnership() {
               >
                 Официальное представительство
               </p>
-              
+
               <div className="flex items-center gap-3">
                 <h3
                   className="text-2xl sm:text-3xl tracking-tight"
@@ -95,15 +95,15 @@ export function Partnership() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300 hover:shadow-md"
-                  style={{ 
+                  style={{
                     backgroundColor: 'var(--color-light-bg)',
                     color: 'var(--color-charcoal)'
                   }}
                 >
-                  <ExternalLink 
-                    size={14} 
-                    style={{ color: 'var(--color-gold)' }} 
-                    className="group-hover:scale-110 transition-transform duration-300" 
+                  <ExternalLink
+                    size={14}
+                    style={{ color: 'var(--color-gold)' }}
+                    className="group-hover:scale-110 transition-transform duration-300"
                   />
                   <span className="text-xs">nills.com</span>
                 </a>
@@ -113,13 +113,20 @@ export function Partnership() {
                 className="text-sm sm:text-base leading-relaxed"
                 style={{ color: 'var(--color-text-muted)' }}
               >
-                Официальный представитель премиальной турецкой мебельной компании Nills в Бишкеке. 
-                Эксклюзивная мебель высочайшего качества с гарантией подлинности.
+                Мы — официальный представитель турецкого бренда Nills в Бишкеке. 
+                Компания известна премиальной мебелью современного дизайна и высоким качеством исполнения.
+              </p>
+
+              <p
+                className="text-sm sm:text-base leading-relaxed"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                Коллекции Nills сочетают элегантность, комфорт и долговечность, создавая атмосферу уюта в каждом пространстве.
               </p>
             </div>
 
-            {/* Компактное изображение */}
-            <div className="relative overflow-hidden rounded-lg shadow-lg h-48 lg:h-56">
+            {/* Фото Nills */}
+            <div className="relative overflow-hidden rounded-lg shadow-lg h-60 lg:h-60">
               <ImageWithFallback
                 src="/images/nills.webp"
                 alt="Nills company building"
