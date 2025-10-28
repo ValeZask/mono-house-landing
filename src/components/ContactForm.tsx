@@ -16,6 +16,37 @@ export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  const formatKyrgyzPhone = (value: string) => {
+    let digits = value.replace(/\D/g, '');
+
+    // убираем 996 и 0
+    if (digits.startsWith('996')) digits = digits.slice(3);
+    if (digits.startsWith('0')) digits = digits.slice(1);
+    digits = digits.slice(0, 9);
+
+    let formatted = '+996';
+    if (digits.length > 0) formatted += ' (' + digits.slice(0, 3);
+    if (digits.length >= 3) formatted += ')';
+    if (digits.length > 3) formatted += ' ' + digits.slice(3, 5);
+    if (digits.length > 5) formatted += '-' + digits.slice(5, 7);
+    if (digits.length > 7) formatted += '-' + digits.slice(7, 9);
+
+    return formatted;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+
+    // если пользователь удаляет, не мешаем
+    if (input.length < formData.phone.length) {
+      setFormData({ ...formData, phone: input });
+      return;
+    }
+
+    const formatted = formatKyrgyzPhone(input);
+    setFormData({ ...formData, phone: formatted });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -24,23 +55,19 @@ export function ContactForm() {
       return;
     }
 
-    // Phone validation (basic)
-    const phoneRegex = /^[0-9]{10,}$/;
     const cleanPhone = formData.phone.replace(/\D/g, '');
-    if (!phoneRegex.test(cleanPhone)) {
-      toast.error('Пожалуйста, введите корректный номер телефона');
+    if (!/^996\d{9}$/.test(cleanPhone)) {
+      toast.error('Введите корректный кыргызский номер (+996 XXX XX-XX-XX)');
       return;
     }
 
     setIsSubmitting(true);
 
-    // Simulate form submission
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
       toast.success('Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.');
-      
-      // Reset form after 3 seconds
+
       setTimeout(() => {
         setFormData({ name: '', phone: '', comment: '' });
         setIsSubmitted(false);
@@ -118,8 +145,8 @@ export function ContactForm() {
                     id="phone"
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+7 (XXX) XXX-XX-XX"
+                    onChange={handlePhoneChange}
+                    placeholder="+996 (XXX) XX-XX-XX"
                     required
                     className="mt-2 border-gray-300 focus:border-[var(--color-gold)] focus:ring-[var(--color-gold)]"
                   />
