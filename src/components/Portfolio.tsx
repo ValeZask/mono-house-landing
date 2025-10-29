@@ -277,6 +277,14 @@ export function Portfolio() {
                   </motion.div>
                 );
               })}
+              {/* Invisible placeholders to preserve grid height when fewer than 6 items */}
+              {Array.from({ length: Math.max(0, ITEMS_PER_PAGE - currentImages.length) }).map((_, i) => (
+                <div
+                  key={`placeholder-${i}`}
+                  className="aspect-[4/3] rounded-lg opacity-0 pointer-events-none"
+                  aria-hidden="true"
+                />
+              ))}
             </div>
 
             {totalPages > 1 && (
@@ -284,42 +292,45 @@ export function Portfolio() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="flex items-center justify-center gap-2"
+                className="flex items-center justify-center gap-6"
               >
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="p-2 rounded-full transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110"
-                  style={{ backgroundColor: currentPage === 1 ? '#E5E5E5' : 'var(--color-gold)', color: 'white' }}
+                  className="w-10 h-10 flex items-center justify-center rounded-full border transition-all duration-200 disabled:opacity-30 hover:bg-gray-50 disabled:hover:bg-transparent"
+                  aria-label="Предыдущая страница"
+                  style={{ 
+                    borderColor: 'var(--border)', 
+                    color: 'var(--color-charcoal)'
+                  }}
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={18} />
                 </button>
-
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className="w-10 h-10 rounded-full transition-all duration-300 flex items-center justify-center"
+                      className="w-2.5 h-2.5 rounded-full transition-all duration-200 hover:scale-110"
                       style={{
-                        backgroundColor: currentPage === page ? 'var(--color-gold)' : 'white',
-                        color: currentPage === page ? 'white' : 'var(--color-charcoal)',
-                        border: currentPage === page ? 'none' : '2px solid var(--color-gold)',
-                        fontFamily: 'Playfair Display, serif',
+                        backgroundColor: currentPage === page ? 'var(--color-gold)' : 'rgba(0,0,0,0.2)',
+                        transform: currentPage === page ? 'scale(1.2)' : 'scale(1)'
                       }}
-                    >
-                      {page}
-                    </button>
+                      aria-label={`Страница ${page}`}
+                    />
                   ))}
                 </div>
-
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="p-2 rounded-full transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110"
-                  style={{ backgroundColor: currentPage === totalPages ? '#E5E5E5' : 'var(--color-gold)', color: 'white' }}
+                  className="w-10 h-10 flex items-center justify-center rounded-full border transition-all duration-200 disabled:opacity-30 hover:bg-gray-50 disabled:hover:bg-transparent"
+                  aria-label="Следующая страница"
+                  style={{ 
+                    borderColor: 'var(--border)', 
+                    color: 'var(--color-charcoal)'
+                  }}
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={18} />
                 </button>
               </motion.div>
             )}
