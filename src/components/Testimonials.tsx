@@ -1,18 +1,47 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Instagram, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { supabase, InstagramReview } from '../lib/supabase';
 
 export function Testimonials() {
-  const instagramReviews = [
-    { url: 'https://www.instagram.com/', name: 'Азиз' },
-    { url: 'https://www.instagram.com/', name: 'Айжан' },
-    { url: 'https://www.instagram.com/', name: 'Нурлан' },
-    { url: 'https://www.instagram.com/', name: 'Карина' },
-    { url: 'https://www.instagram.com/', name: 'Эльдар' },
-    { url: 'https://www.instagram.com/', name: 'Динара' },
-    { url: 'https://www.instagram.com/', name: 'Азамат' },
-    { url: 'https://www.instagram.com/', name: 'Камила' },
-  ];
+  const [instagramReviews, setInstagramReviews] = useState<InstagramReview[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('instagram_reviews')
+          .select('*')
+          .order('display_order', { ascending: true });
+
+        if (error) throw error;
+        setInstagramReviews(data || []);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+
+    // Subscribe to real-time changes
+    const subscription = supabase
+      .channel('reviews_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'instagram_reviews' },
+        () => {
+          fetchReviews();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const itemsPerPage = 6;
   const [page, setPage] = useState(1);
@@ -22,6 +51,54 @@ export function Testimonials() {
     return instagramReviews.slice(start, start + itemsPerPage);
   }, [page, instagramReviews]);
   const goToPage = (p: number) => setPage(Math.min(Math.max(1, p), totalPages));
+
+  // Show loading state
+  if (loading) {
+    return (
+      <section 
+        className="py-1 sm:py-2" 
+        style={{ backgroundColor: 'var(--color-light-bg)' }}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2
+              className="text-3xl sm:text-4xl mb-4"
+              style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}
+            >
+              Видео-отзывы в Instagram
+            </h2>
+          </div>
+          <div className="min-h-[400px] flex items-center justify-center">
+            <p className="text-gray-500">Загрузка отзывов...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Show empty state
+  if (instagramReviews.length === 0) {
+    return (
+      <section 
+        className="py-1 sm:py-2" 
+        style={{ backgroundColor: 'var(--color-light-bg)' }}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2
+              className="text-3xl sm:text-4xl mb-4"
+              style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}
+            >
+              Видео-отзывы в Instagram
+            </h2>
+          </div>
+          <div className="min-h-[400px] flex items-center justify-center">
+            <p className="text-gray-500">Отзывы скоро появятся</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section 

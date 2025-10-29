@@ -15,3 +15,11 @@ export interface PortfolioImage {
   display_order: number;
   created_at: string;
 }
+
+export interface InstagramReview {
+  id: string;
+  url: string;
+  name: string;
+  display_order: number;
+  created_at: string;
+}

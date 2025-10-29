@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, PortfolioImage } from '../lib/supabase';
+import { supabase, PortfolioImage, InstagramReview } from '../lib/supabase';
 import {
   DndContext,
   closestCenter,
@@ -15,7 +15,125 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash2, Upload, LogOut, GripVertical, Plus, Image as ImageIcon, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown } from 'lucide-react';
+import { Trash2, Upload, LogOut, GripVertical, Plus, Image as ImageIcon, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, Instagram, Link } from 'lucide-react';
+
+function SortableReviewItem({ 
+  review, 
+  onDelete, 
+  onMoveUp, 
+  onMoveDown, 
+  onMoveTop, 
+  onMoveBottom,
+  isFirst, 
+  isLast,
+  isMobile 
+}: { 
+  review: InstagramReview; 
+  onDelete: (id: string) => void;
+  onMoveUp: (id: string) => void;
+  onMoveDown: (id: string) => void;
+  onMoveTop: (id: string) => void;
+  onMoveBottom: (id: string) => void;
+  isFirst: boolean;
+  isLast: boolean;
+  isMobile: boolean;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: review.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  if (isMobile) {
+    return (
+      <div className="bg-white rounded-lg shadow-md border-2 border-gray-200 overflow-hidden">
+        <div className="flex items-center gap-3 p-3">
+          <Instagram className="w-8 h-8 text-pink-500 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-700 truncate">{review.name}</p>
+            <p className="text-xs text-gray-500 truncate">{review.url}</p>
+            <p className="text-xs text-gray-400">Позиция: {review.display_order}</p>
+          </div>
+          <button
+            onClick={() => onDelete(review.id)}
+            className="p-2 text-red-600 hover:bg-red-50 active:bg-red-100 rounded-lg transition-colors flex-shrink-0"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="border-t border-gray-200 p-2 flex gap-2">
+          <button
+            onClick={() => onMoveTop(review.id)}
+            disabled={isFirst}
+            className="flex-1 flex items-center justify-center gap-1 py-2 px-3 bg-gray-100 text-gray-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed active:bg-gray-200 transition-colors text-sm font-medium"
+          >
+            <ChevronsUp className="w-4 h-4" />
+            <span>В начало</span>
+          </button>
+          
+          <button
+            onClick={() => onMoveUp(review.id)}
+            disabled={isFirst}
+            className="flex items-center justify-center p-2 bg-gray-100 text-gray-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed active:bg-gray-200 transition-colors"
+          >
+            <ChevronUp className="w-5 h-5" />
+          </button>
+          
+          <button
+            onClick={() => onMoveDown(review.id)}
+            disabled={isLast}
+            className="flex items-center justify-center p-2 bg-gray-100 text-gray-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed active:bg-gray-200 transition-colors"
+          >
+            <ChevronDown className="w-5 h-5" />
+          </button>
+          
+          <button
+            onClick={() => onMoveBottom(review.id)}
+            disabled={isLast}
+            className="flex-1 flex items-center justify-center gap-1 py-2 px-3 bg-gray-100 text-gray-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed active:bg-gray-200 transition-colors text-sm font-medium"
+          >
+            <ChevronsDown className="w-4 h-4" />
+            <span>В конец</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-4 p-4 bg-white rounded-lg shadow-md border-2 border-gray-200 hover:border-pink-400 transition-colors ${
+        isDragging ? 'z-50' : ''
+      }`}
+    >
+      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
+        <GripVertical className="w-6 h-6 text-gray-400" />
+      </div>
+      
+      <Instagram className="w-8 h-8 text-pink-500 flex-shrink-0" />
+      
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-700 truncate">{review.name}</p>
+        <p className="text-xs text-gray-500 truncate">{review.url}</p>
+        <p className="text-xs text-gray-400">Позиция: {review.display_order}</p>
+      </div>
+      
+      <button
+        onClick={() => onDelete(review.id)}
+        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+      >
+        <Trash2 className="w-5 h-5" />
+      </button>
+    </div>
+  );
+}
 
 function SortableItem({ 
   image, 
@@ -148,6 +266,7 @@ export function Admin() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState<PortfolioImage[]>([]);
+  const [reviews, setReviews] = useState<InstagramReview[]>([]);
   const [uploading, setUploading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -155,6 +274,9 @@ export function Admin() {
   const [isMobile, setIsMobile] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'reviews'>('portfolio');
+  const [newReviewName, setNewReviewName] = useState('');
+  const [newReviewUrl, setNewReviewUrl] = useState('');
 
   useEffect(() => {
     const checkMobile = () => {
@@ -168,7 +290,7 @@ export function Admin() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: isMobile ? 5 : 8,
       },
     })
   );
@@ -183,6 +305,7 @@ export function Admin() {
     setLoading(false);
     if (session?.user) {
       fetchImages();
+      fetchReviews();
     }
   };
 
@@ -196,6 +319,19 @@ export function Admin() {
       console.error('Error fetching images:', error);
     } else {
       setImages(data || []);
+    }
+  };
+
+  const fetchReviews = async () => {
+    const { data, error } = await supabase
+      .from('instagram_reviews')
+      .select('*')
+      .order('display_order', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching reviews:', error);
+    } else {
+      setReviews(data || []);
     }
   };
 
@@ -213,6 +349,7 @@ export function Admin() {
     } else {
       setUser(data.user);
       fetchImages();
+      fetchReviews();
     }
   };
 
@@ -220,6 +357,130 @@ export function Admin() {
     await supabase.auth.signOut();
     setUser(null);
     setImages([]);
+    setReviews([]);
+  };
+
+  // Instagram Reviews Management Functions
+  const addReview = async () => {
+    if (!newReviewName.trim() || !newReviewUrl.trim()) {
+      alert('Пожалуйста, заполните все поля');
+      return;
+    }
+
+    if (!newReviewUrl.includes('instagram.com')) {
+      alert('Пожалуйста, введите корректную ссылку на Instagram');
+      return;
+    }
+
+    try {
+      const maxOrder = reviews.length > 0
+        ? Math.max(...reviews.map(r => r.display_order))
+        : 0;
+
+      const { data, error } = await supabase
+        .from('instagram_reviews')
+        .insert([{ 
+          name: newReviewName.trim(), 
+          url: newReviewUrl.trim(),
+          display_order: maxOrder + 1 
+        }])
+        .select();
+
+      if (error) throw error;
+
+      setNewReviewName('');
+      setNewReviewUrl('');
+      await fetchReviews();
+    } catch (error) {
+      console.error('Error adding review:', error);
+      alert('Ошибка при добавлении отзыва');
+    }
+  };
+
+  const deleteReview = async (id: string) => {
+    if (!confirm('Удалить этот отзыв?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('instagram_reviews')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      const updatedReviews = reviews.filter(r => r.id !== id);
+      await reorderReviews(updatedReviews);
+      
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      alert('Ошибка при удалении');
+    }
+  };
+
+  const reorderReviews = async (updatedReviews: InstagramReview[]) => {
+    const reorderedReviews = updatedReviews.map((review, index) => ({
+      ...review,
+      display_order: index + 1,
+    }));
+
+    setReviews(reorderedReviews);
+
+    try {
+      for (const review of reorderedReviews) {
+        await supabase
+          .from('instagram_reviews')
+          .update({ display_order: review.display_order })
+          .eq('id', review.id);
+      }
+    } catch (error) {
+      console.error('Error reordering reviews:', error);
+      fetchReviews();
+    }
+  };
+
+  // Review movement functions
+  const handleReviewMoveUp = async (id: string) => {
+    const index = reviews.findIndex(r => r.id === id);
+    if (index <= 0) return;
+    
+    const newReviews = arrayMove(reviews, index, index - 1);
+    await reorderReviews(newReviews);
+  };
+
+  const handleReviewMoveDown = async (id: string) => {
+    const index = reviews.findIndex(r => r.id === id);
+    if (index >= reviews.length - 1) return;
+    
+    const newReviews = arrayMove(reviews, index, index + 1);
+    await reorderReviews(newReviews);
+  };
+
+  const handleReviewMoveTop = async (id: string) => {
+    const index = reviews.findIndex(r => r.id === id);
+    if (index <= 0) return;
+    
+    const newReviews = arrayMove(reviews, index, 0);
+    await reorderReviews(newReviews);
+  };
+
+  const handleReviewMoveBottom = async (id: string) => {
+    const index = reviews.findIndex(r => r.id === id);
+    if (index >= reviews.length - 1) return;
+    
+    const newReviews = arrayMove(reviews, index, reviews.length - 1);
+    await reorderReviews(newReviews);
+  };
+
+  const handleReviewDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = reviews.findIndex(r => r.id === active.id);
+      const newIndex = reviews.findIndex(r => r.id === over.id);
+
+      const newReviews = arrayMove(reviews, oldIndex, newIndex);
+      await reorderReviews(newReviews);
+    }
   };
 
   const reorderImages = async (updatedImages: PortfolioImage[]) => {
@@ -476,7 +737,7 @@ export function Admin() {
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 pb-20 sm:pb-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-3xl font-bold">Управление портфолио</h1>
+          <h1 className="text-xl sm:text-3xl font-bold">Админ-панель</h1>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 active:bg-gray-400 transition-colors text-sm sm:text-base"
@@ -486,52 +747,85 @@ export function Admin() {
           </button>
         </div>
 
-        <div className="mb-6 sm:mb-8">
-          <input
-            type="file"
-            id="fileInput"
-            multiple
-            accept="image/png,image/jpeg,image/jpg,image/webp"
-            onChange={handleFileInput}
-            className="hidden"
-          />
-          <label
-            htmlFor="fileInput"
-            onDragEnter={handleDragEnter}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`block p-8 sm:p-12 border-2 border-dashed rounded-xl text-center cursor-pointer transition-all ${
-              uploading
-                ? 'border-gray-300 bg-gray-50 cursor-not-allowed'
-                : isDragging && !isMobile
-                ? 'border-blue-500 bg-blue-50 scale-105 shadow-lg'
-                : 'border-gray-300 hover:border-blue-400 bg-white active:bg-blue-50'
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6 sm:mb-8">
+          <button
+            onClick={() => setActiveTab('portfolio')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'portfolio'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
-            {isMobile ? (
-              <Plus className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-400" />
-            ) : (
-              <Upload className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-400" />
-            )}
-            {uploading ? (
-              <p className="text-base sm:text-lg font-medium">Загрузка...</p>
-            ) : (
-              <>
-                <p className="text-base sm:text-lg mb-2 font-medium">
-                  {isMobile 
-                    ? 'Нажмите для добавления фото' 
-                    : isDragging
-                    ? 'Отпустите для загрузки изображений'
-                    : 'Выберите или перетащите изображения сюда'}
-                </p>
-                <p className="text-xs sm:text-sm text-gray-500">
-                  {isMobile ? 'Можно выбрать несколько' : 'Поддерживаются PNG, JPG, WEBP'}
-                </p>
-              </>
-            )}
-          </label>
+            <div className="flex items-center gap-2">
+              <ImageIcon className="w-4 h-4" />
+              <span>Портфолио</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'reviews'
+                ? 'bg-pink-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Instagram className="w-4 h-4" />
+              <span>Отзывы Instagram</span>
+            </div>
+          </button>
         </div>
+
+        {/* Portfolio Tab */}
+        {activeTab === 'portfolio' && (
+          <>
+            <div className="mb-6 sm:mb-8">
+              <input
+                type="file"
+                id="fileInput"
+                multiple
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                onChange={handleFileInput}
+                className="hidden"
+              />
+              <label
+                htmlFor="fileInput"
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`block p-8 sm:p-12 border-2 border-dashed rounded-xl text-center cursor-pointer transition-all ${
+                  uploading
+                    ? 'border-gray-300 bg-gray-50 cursor-not-allowed'
+                    : isDragging && !isMobile
+                    ? 'border-blue-500 bg-blue-50 scale-105 shadow-lg'
+                    : 'border-gray-300 hover:border-blue-400 bg-white active:bg-blue-50'
+                }`}
+              >
+                {isMobile ? (
+                  <Plus className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-400" />
+                ) : (
+                  <Upload className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-400" />
+                )}
+                {uploading ? (
+                  <p className="text-base sm:text-lg font-medium">Загрузка...</p>
+                ) : (
+                  <>
+                    <p className="text-base sm:text-lg mb-2 font-medium">
+                      {isMobile 
+                        ? 'Нажмите для добавления фото' 
+                        : isDragging
+                        ? 'Отпустите для загрузки изображений'
+                        : 'Выберите или перетащите изображения сюда'}
+                    </p>
+                    <p className="text-xs sm:text-sm text-gray-500">
+                      {isMobile ? 'Можно выбрать несколько' : 'Поддерживаются PNG, JPG, WEBP'}
+                    </p>
+                  </>
+                )}
+              </label>
+            </div>
 
         <div className="space-y-4">
           <h2 className="text-lg sm:text-xl font-semibold mb-4">
@@ -544,7 +838,7 @@ export function Admin() {
               <p className="text-sm sm:text-base">Нет изображений. Загрузите первое!</p>
             </div>
           ) : isMobile ? (
-            // Мобильная версия - без drag-and-drop, только кнопки
+            // Мобильная версия - с кнопками
             <div className="space-y-3">
               {images.map((image, index) => (
                 <SortableItem 
@@ -592,6 +886,113 @@ export function Admin() {
             </DndContext>
           )}
         </div>
+          </>
+        )}
+
+        {/* Reviews Tab */}
+        {activeTab === 'reviews' && (
+          <>
+            <div className="mb-6 sm:mb-8">
+              <div className="bg-white p-6 rounded-xl shadow-md border-2 border-gray-200">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-pink-500" />
+                  Добавить новый отзыв
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Имя заказчика
+                    </label>
+                    <input
+                      type="text"
+                      value={newReviewName}
+                      onChange={(e) => setNewReviewName(e.target.value)}
+                      placeholder="Например: Азиз"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Ссылка на Instagram
+                    </label>
+                    <input
+                      type="url"
+                      value={newReviewUrl}
+                      onChange={(e) => setNewReviewUrl(e.target.value)}
+                      placeholder="https://www.instagram.com/p/..."
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  <button
+                    onClick={addReview}
+                    className="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 active:bg-pink-800 transition-colors font-medium"
+                  >
+                    Добавить отзыв
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4">
+                Отзывы Instagram ({reviews.length})
+              </h2>
+              
+              {reviews.length === 0 ? (
+                <div className="text-center text-gray-500 py-12">
+                  <Instagram className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                  <p className="text-sm sm:text-base">Нет отзывов. Добавьте первый!</p>
+                </div>
+              ) : isMobile ? (
+                // Мобильная версия - с кнопками
+                <div className="space-y-3">
+                  {reviews.map((review, index) => (
+                    <SortableReviewItem 
+                      key={review.id} 
+                      review={review} 
+                      onDelete={deleteReview}
+                      onMoveUp={handleReviewMoveUp}
+                      onMoveDown={handleReviewMoveDown}
+                      onMoveTop={handleReviewMoveTop}
+                      onMoveBottom={handleReviewMoveBottom}
+                      isFirst={index === 0}
+                      isLast={index === reviews.length - 1}
+                      isMobile={true}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleReviewDragEnd}
+                >
+                  <SortableContext 
+                    items={reviews.map(r => r.id)} 
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-4">
+                      {reviews.map((review, index) => (
+                        <SortableReviewItem 
+                          key={review.id} 
+                          review={review} 
+                          onDelete={deleteReview}
+                          onMoveUp={handleReviewMoveUp}
+                          onMoveDown={handleReviewMoveDown}
+                          onMoveTop={handleReviewMoveTop}
+                          onMoveBottom={handleReviewMoveBottom}
+                          isFirst={index === 0}
+                          isLast={index === reviews.length - 1}
+                          isMobile={false}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
