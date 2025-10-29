@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Instagram, Facebook, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Instagram } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 
 export function Footer() {
   return (
@@ -66,7 +67,8 @@ export function Footer() {
                 className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
                 aria-label="Адрес на 2ГИС"
               >
-                <MapPin size={20} style={{ color: 'var(--color-gold)' }} />
+                {/* увеличен размер иконки */}
+                <MapPin size={37} style={{ color: 'var(--color-gold)' }} />
                 <span>Baytik Tower, ул. Байтик баатыра, 66/1 стр; ул. Радищева, 28, Бишкек</span>
               </a>
             </div>
@@ -96,27 +98,33 @@ export function Footer() {
                 <Instagram size={20} style={{ color: 'var(--color-gold)' }} />
                 <span>@mono_house.kg</span>
               </a>
-              <div className="flex items-center gap-3 text-white/40">
-                <Facebook size={20} style={{ color: 'var(--color-gold)' }} />
-                <span>Coming soon</span>
-              </div>
             </div>
 
             <h4
               className="text-xl mb-6 text-white"
               style={{ fontFamily: 'Playfair Display, serif' }}
             >
-              Мессенджеры
+              WhatsApp
             </h4>
             <div className="space-y-4">
-              <div className="flex items-center gap-3 text-white/40">
-                <MessageCircle size={20} style={{ color: 'var(--color-gold)' }} />
-                <span>WhatsApp - Coming soon</span>
-              </div>
-              <div className="flex items-center gap-3 text-white/40">
-                <MessageCircle size={20} style={{ color: 'var(--color-gold)' }} />
-                <span>Telegram - Coming soon</span>
-              </div>
+              <a
+                href="https://wa.me/996507909567"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
+              >
+                <FaWhatsapp size={20} color="var(--color-gold)" />
+                <span>0507909567</span>
+              </a>
+              <a
+                href="https://wa.me/996500914700"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
+              >
+                <FaWhatsapp size={20} color="var(--color-gold)" />
+                <span>0500914700</span>
+              </a>
             </div>
           </motion.div>
         </div>
