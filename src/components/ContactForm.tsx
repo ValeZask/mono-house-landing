@@ -51,13 +51,13 @@ export function ContactForm() {
     e.preventDefault();
 
     if (!formData.name || !formData.phone) {
-      toast.error('Пожалуйста, заполните обязательные поля');
+      toast.error('Заполните обязательные поля');
       return;
     }
 
     const cleanPhone = formData.phone.replace(/\D/g, '');
     if (!/^996\d{9}$/.test(cleanPhone)) {
-      toast.error('Введите корректный кыргызский номер (+996 XXX XX-XX-XX)');
+      toast.error('Введите корректный номер телефона');
       return;
     }
 
@@ -66,7 +66,7 @@ export function ContactForm() {
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
-      toast.success('Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.');
+      toast.success('Заявка отправлена! Мы свяжемся с вами.');
 
       setTimeout(() => {
         setFormData({ name: '', phone: '', comment: '' });
@@ -96,7 +96,7 @@ export function ContactForm() {
             Оставьте заявку
           </h2>
           <p className="text-lg text-white/80">
-            Свяжитесь с нашим специалистом для расчета стоимости
+            С вами свяжется наш специалист для консультации
           </p>
         </motion.div>
 
@@ -160,7 +160,7 @@ export function ContactForm() {
                     id="comment"
                     value={formData.comment}
                     onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
-                    placeholder="Расскажите о вашем проекте..."
+                    placeholder="Необязательно"
                     rows={4}
                     className="mt-2 border-gray-300 focus:border-[var(--color-gold)] focus:ring-[var(--color-gold)]"
                   />

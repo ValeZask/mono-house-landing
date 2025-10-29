@@ -44,7 +44,23 @@ export default function App() {
       <Process />
       <ContactForm />
       <Footer />
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-center" 
+        offset="120px"
+        toastOptions={{
+          style: {
+            background: 'var(--color-charcoal)',
+            color: 'white',
+            border: '1px solid var(--color-gold)',
+            borderRadius: '12px',
+            fontSize: '14px',
+            fontWeight: '400',
+            padding: '12px 16px',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+          },
+          duration: 4000,
+        }}
+      />
     </div>
   );
 }
