@@ -59,10 +59,16 @@ export function Footer() {
                 <Phone size={20} style={{ color: 'var(--color-gold)' }} />
                 <span>0500914700</span>
               </a>
-              <div className="flex items-center gap-3 text-white/40">
+              <a
+                href="https://2gis.kg/bishkek/geo/70000001053828677/74.609138,42.854126"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
+                aria-label="Адрес на 2ГИС"
+              >
                 <MapPin size={20} style={{ color: 'var(--color-gold)' }} />
-                <span>Скоро здесь будет наш адрес</span>
-              </div>
+                <span>Baytik Tower, ул. Байтик баатыра, 66/1 стр; ул. Радищева, 28, Бишкек</span>
+              </a>
             </div>
           </motion.div>
 
@@ -80,10 +86,16 @@ export function Footer() {
               Мы в соцсетях
             </h4>
             <div className="space-y-4 mb-6">
-              <div className="flex items-center gap-3 text-white/40">
+              <a
+                href="https://www.instagram.com/mono_house.kg?igsh=MTk2M2E0cXhneWZ1YQ=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
+                aria-label="Instagram Mono House"
+              >
                 <Instagram size={20} style={{ color: 'var(--color-gold)' }} />
-                <span>Coming soon</span>
-              </div>
+                <span>@mono_house.kg</span>
+              </a>
               <div className="flex items-center gap-3 text-white/40">
                 <Facebook size={20} style={{ color: 'var(--color-gold)' }} />
                 <span>Coming soon</span>
