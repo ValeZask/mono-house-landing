@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Instagram, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Instagram, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase, InstagramReview } from '../lib/supabase';
 
 export function Testimonials() {
@@ -26,7 +26,6 @@ export function Testimonials() {
 
     fetchReviews();
 
-    // Subscribe to real-time changes
     const subscription = supabase
       .channel('reviews_changes')
       .on(
@@ -52,15 +51,11 @@ export function Testimonials() {
   }, [page, instagramReviews]);
   const goToPage = (p: number) => setPage(Math.min(Math.max(1, p), totalPages));
 
-  // Show loading state
   if (loading) {
     return (
-      <section 
-        className="py-1 sm:py-2" 
-        style={{ backgroundColor: 'var(--color-light-bg)' }}
-      >
+      <section className="py-16 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-6">
             <h2
               className="text-3xl sm:text-4xl mb-4"
               style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}
@@ -76,15 +71,11 @@ export function Testimonials() {
     );
   }
 
-  // Show empty state
   if (instagramReviews.length === 0) {
     return (
-      <section 
-        className="py-1 sm:py-2" 
-        style={{ backgroundColor: 'var(--color-light-bg)' }}
-      >
+      <section className="py-16 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-6">
             <h2
               className="text-3xl sm:text-4xl mb-4"
               style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}
@@ -101,18 +92,14 @@ export function Testimonials() {
   }
 
   return (
-    <section 
-      className="py-1 sm:py-2" 
-      style={{ backgroundColor: 'var(--color-light-bg)' }}
-    >
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Заголовок секции */}
+    <section className="py-16 bg-white">
+      <div className="max-w-6xl mx-auto px-3 sm:px-5 lg:px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
           <h2
             className="text-3xl sm:text-4xl mb-4"
@@ -122,22 +109,22 @@ export function Testimonials() {
           </h2>
         </motion.div>
 
-        {/* Список ссылок на Instagram-отзывы */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <div className="min-h-[400px]">
-            <ul className="divide-y" style={{ borderColor: 'var(--border)' }}>
+          <div>
+            <ul className="space-y-4">
               {currentItems.map((item, index) => (
-                <li key={index} className="py-2">
+                <li key={index}>
                   <a
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 group rounded-lg px-3 py-3 transition-colors hover:bg-white"
+                    className="flex items-center justify-between gap-3 group rounded-lg px-2 sm:px-3 py-3 transition-all shadow-sm"
+                    style={{ backgroundColor: 'var(--color-light-bg)' }}
                     aria-label={`Смотреть отзыв от заказчика ${item.name} в Instagram`}
                   >
                     <div className="flex items-center gap-3">
@@ -149,12 +136,17 @@ export function Testimonials() {
                         {`Отзыв от заказчика ${item.name}`}
                       </span>
                     </div>
-                    <ExternalLink size={18} className="opacity-60 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--color-charcoal)' }} />
+                    <ChevronRight
+                      size={20}
+                      className="opacity-70 group-hover:opacity-100 transition-opacity"
+                      style={{ color: 'var(--color-charcoal)' }}
+                    />
                   </a>
                 </li>
               ))}
             </ul>
           </div>
+
           {totalPages > 1 && (
             <div className="mt-8 flex items-center justify-center gap-6">
               <button
@@ -162,13 +154,14 @@ export function Testimonials() {
                 disabled={page === 1}
                 className="w-10 h-10 flex items-center justify-center rounded-full border transition-all duration-200 disabled:opacity-30 hover:bg-gray-50 disabled:hover:bg-transparent"
                 aria-label="Предыдущая страница"
-                style={{ 
-                  borderColor: 'var(--border)', 
-                  color: 'var(--color-charcoal)'
+                style={{
+                  borderColor: 'var(--border)',
+                  color: 'var(--color-charcoal)',
                 }}
               >
                 <ChevronLeft size={18} />
               </button>
+
               <div className="flex items-center gap-2">
                 {Array.from({ length: totalPages }).map((_, i) => {
                   const pageNumber = i + 1;
@@ -179,22 +172,25 @@ export function Testimonials() {
                       onClick={() => goToPage(pageNumber)}
                       className="w-2.5 h-2.5 rounded-full transition-all duration-200 hover:scale-110"
                       style={{
-                        backgroundColor: isActive ? 'var(--color-gold)' : 'rgba(0,0,0,0.2)',
-                        transform: isActive ? 'scale(1.2)' : 'scale(1)'
+                        backgroundColor: isActive
+                          ? 'var(--color-gold)'
+                          : 'rgba(0,0,0,0.2)',
+                        transform: isActive ? 'scale(1.2)' : 'scale(1)',
                       }}
                       aria-label={`Страница ${pageNumber}`}
                     />
                   );
                 })}
               </div>
+
               <button
                 onClick={() => goToPage(page + 1)}
                 disabled={page === totalPages}
                 className="w-10 h-10 flex items-center justify-center rounded-full border transition-all duration-200 disabled:opacity-30 hover:bg-gray-50 disabled:hover:bg-transparent"
                 aria-label="Следующая страница"
-                style={{ 
-                  borderColor: 'var(--border)', 
-                  color: 'var(--color-charcoal)'
+                style={{
+                  borderColor: 'var(--border)',
+                  color: 'var(--color-charcoal)',
                 }}
               >
                 <ChevronRight size={18} />

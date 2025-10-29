@@ -4,7 +4,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 
 export function Footer() {
   return (
-    <footer className="py-16" style={{ backgroundColor: 'var(--color-charcoal)' }}>
+    <footer className="py-6" style={{ backgroundColor: 'var(--color-charcoal)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-12">
           {/* Company Info */}
@@ -135,7 +135,7 @@ export function Footer() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="pt-17 border-t text-center text-white/50"
+          className="pt-5 border-t text-center text-white/50"
           style={{ borderColor: 'rgba(212, 175, 55, 0.2)' }}
         >
           <p>© 2025 Mono House. Все права защищены</p>

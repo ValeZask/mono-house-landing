@@ -238,7 +238,7 @@ export function Portfolio() {
   };
 
   return (
-    <section id="portfolio" className="py-20 sm:py-32" style={{ backgroundColor: 'var(--color-light-bg)' }}>
+    <section id="portfolio" className="py-20 sm:py-16" style={{ backgroundColor: 'var(--color-light-bg)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
