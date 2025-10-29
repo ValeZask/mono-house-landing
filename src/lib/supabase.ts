@@ -23,3 +23,13 @@ export interface InstagramReview {
   display_order: number;
   created_at: string;
 }
+
+export interface ContactSubmission {
+  id: string;
+  name: string;
+  phone: string;
+  comment: string;
+  status: 'new' | 'contacted' | 'completed';
+  created_at: string;
+  updated_at: string;
+}

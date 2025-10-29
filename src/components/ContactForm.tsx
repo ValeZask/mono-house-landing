@@ -6,6 +6,7 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
 import { CheckCircle } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export function ContactForm() {
   const [formData, setFormData] = useState({
@@ -19,9 +20,12 @@ export function ContactForm() {
   const formatKyrgyzPhone = (value: string) => {
     let digits = value.replace(/\D/g, '');
 
-    // убираем 996 и 0
+    // убираем различные префиксы
     if (digits.startsWith('996')) digits = digits.slice(3);
     if (digits.startsWith('0')) digits = digits.slice(1);
+    if (digits.startsWith('+996')) digits = digits.slice(4);
+    
+    // ограничиваем до 9 цифр
     digits = digits.slice(0, 9);
 
     let formatted = '+996';
@@ -47,6 +51,14 @@ export function ContactForm() {
     setFormData({ ...formData, phone: formatted });
   };
 
+  const handlePhonePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    
+    const pastedText = e.clipboardData.getData('text');
+    const formatted = formatKyrgyzPhone(pastedText);
+    setFormData({ ...formData, phone: formatted });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -63,7 +75,23 @@ export function ContactForm() {
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase
+        .from('contacts')
+        .insert([
+          {
+            name: formData.name.trim(),
+            phone: cleanPhone,
+            comment: formData.comment.trim(),
+            status: 'new'
+          }
+        ])
+        .select();
+
+      if (error) {
+        throw error;
+      }
+
       setIsSubmitting(false);
       setIsSubmitted(true);
       toast.success('Заявка отправлена! Мы свяжемся с вами.');
@@ -72,7 +100,11 @@ export function ContactForm() {
         setFormData({ name: '', phone: '', comment: '' });
         setIsSubmitted(false);
       }, 3000);
-    }, 1500);
+    } catch (error: any) {
+      console.error('Error submitting contact form:', error);
+      setIsSubmitting(false);
+      toast.error('Ошибка при отправке заявки. Попробуйте еще раз.');
+    }
   };
 
   return (
@@ -146,6 +178,7 @@ export function ContactForm() {
                     type="tel"
                     value={formData.phone}
                     onChange={handlePhoneChange}
+                    onPaste={handlePhonePaste}
                     placeholder="+996 (XXX) XX-XX-XX"
                     required
                     className="mt-2 border-gray-300 focus:border-[var(--color-gold)] focus:ring-[var(--color-gold)]"

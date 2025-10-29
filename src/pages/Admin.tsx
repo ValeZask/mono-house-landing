@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, PortfolioImage, InstagramReview } from '../lib/supabase';
+import { supabase, PortfolioImage, InstagramReview, ContactSubmission } from '../lib/supabase';
 import {
   DndContext,
   closestCenter,
@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash2, Upload, LogOut, GripVertical, Plus, Image as ImageIcon, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, Instagram, Link } from 'lucide-react';
+import { Trash2, Upload, LogOut, GripVertical, Plus, Image as ImageIcon, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, Instagram, Link, MessageSquare, Phone, User, Calendar } from 'lucide-react';
 
 function SortableReviewItem({ 
   review, 
@@ -274,9 +274,10 @@ export function Admin() {
   const [isMobile, setIsMobile] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'reviews'>('portfolio');
+  const [activeTab, setActiveTab] = useState<'portfolio' | 'reviews' | 'contacts'>('portfolio');
   const [newReviewName, setNewReviewName] = useState('');
   const [newReviewUrl, setNewReviewUrl] = useState('');
+  const [contacts, setContacts] = useState<ContactSubmission[]>([]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -306,6 +307,7 @@ export function Admin() {
     if (session?.user) {
       fetchImages();
       fetchReviews();
+      fetchContacts();
     }
   };
 
@@ -335,6 +337,19 @@ export function Admin() {
     }
   };
 
+  const fetchContacts = async () => {
+    const { data, error } = await supabase
+      .from('contacts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching contacts:', error);
+    } else {
+      setContacts(data || []);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
@@ -350,6 +365,7 @@ export function Admin() {
       setUser(data.user);
       fetchImages();
       fetchReviews();
+      fetchContacts();
     }
   };
 
@@ -358,6 +374,7 @@ export function Admin() {
     setUser(null);
     setImages([]);
     setReviews([]);
+    setContacts([]);
   };
 
   // Instagram Reviews Management Functions
@@ -480,6 +497,48 @@ export function Admin() {
 
       const newReviews = arrayMove(reviews, oldIndex, newIndex);
       await reorderReviews(newReviews);
+    }
+  };
+
+  // Contact Management Functions
+  const updateContactStatus = async (id: string, status: 'new' | 'contacted' | 'completed') => {
+    try {
+      const { error } = await supabase
+        .from('contacts')
+        .update({ 
+          status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setContacts(contacts.map(contact => 
+        contact.id === id 
+          ? { ...contact, status, updated_at: new Date().toISOString() }
+          : contact
+      ));
+    } catch (error) {
+      console.error('Error updating contact status:', error);
+      alert('Ошибка при обновлении статуса');
+    }
+  };
+
+  const deleteContact = async (id: string) => {
+    if (!confirm('Удалить эту заявку?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('contacts')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setContacts(contacts.filter(contact => contact.id !== id));
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+      alert('Ошибка при удалении заявки');
     }
   };
 
@@ -748,31 +807,44 @@ export function Admin() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row gap-2 mb-6 sm:mb-8">
           <button
             onClick={() => setActiveTab('portfolio')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
               activeTab === 'portfolio'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <div className="flex items-center gap-2">
-              <ImageIcon className="w-4 h-4" />
-              <span>Портфолио</span>
+            <div className="flex items-center justify-center gap-2">
+              <ImageIcon className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">Портфолио</span>
             </div>
           </button>
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
               activeTab === 'reviews'
                 ? 'bg-pink-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <div className="flex items-center gap-2">
-              <Instagram className="w-4 h-4" />
-              <span>Отзывы Instagram</span>
+            <div className="flex items-center justify-center gap-2">
+              <Instagram className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">Отзывы</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('contacts')}
+            className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
+              activeTab === 'contacts'
+                ? 'bg-green-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <MessageSquare className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">Заявки ({contacts.length})</span>
             </div>
           </button>
         </div>
@@ -992,6 +1064,113 @@ export function Admin() {
               )}
             </div>
           </>
+        )}
+
+        {/* Contacts Tab */}
+        {activeTab === 'contacts' && (
+          <div className="space-y-4">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">
+              Заявки клиентов ({contacts.length})
+            </h2>
+            
+            {contacts.length === 0 ? (
+              <div className="text-center text-gray-500 py-12">
+                <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p className="text-sm sm:text-base">Нет заявок</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {contacts.map((contact) => (
+                  <div key={contact.id} className="bg-white rounded-lg shadow-md border-2 border-gray-200 p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                      <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+                          <div className="flex items-center gap-2">
+                            <User className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                            <span className="font-medium text-gray-900 truncate">{contact.name}</span>
+                          </div>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium self-start sm:self-center ${
+                            contact.status === 'new' 
+                              ? 'bg-red-100 text-red-800' 
+                              : contact.status === 'contacted'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-green-100 text-green-800'
+                          }`}>
+                            {contact.status === 'new' ? 'Новая' : 
+                             contact.status === 'contacted' ? 'Связались' : 'Завершена'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 mb-3">
+                          <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                          <a 
+                            href={`tel:${contact.phone}`}
+                            className="text-blue-600 hover:text-blue-800 font-medium break-all"
+                          >
+                            {contact.phone}
+                          </a>
+                        </div>
+                        
+                        {contact.comment && (
+                          <div className="mb-3">
+                            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg break-words">
+                              {contact.comment}
+                            </p>
+                          </div>
+                        )}
+                        
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4 flex-shrink-0" />
+                            <span>Создана: {new Date(contact.created_at).toLocaleString('ru-RU')}</span>
+                          </div>
+                          {contact.updated_at !== contact.created_at && (
+                            <>
+                              <span className="hidden sm:inline">•</span>
+                              <span>Обновлена: {new Date(contact.updated_at).toLocaleString('ru-RU')}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-col gap-2 sm:min-w-[200px]">
+                        {contact.status === 'new' && (
+                          <>
+                            <button
+                              onClick={() => updateContactStatus(contact.id, 'contacted')}
+                              className="w-full px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 active:bg-yellow-800 transition-colors text-sm font-medium"
+                            >
+                              Отметить как связались
+                            </button>
+                            <button
+                              onClick={() => updateContactStatus(contact.id, 'completed')}
+                              className="w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors text-sm font-medium"
+                            >
+                              Завершить
+                            </button>
+                          </>
+                        )}
+                        {contact.status === 'contacted' && (
+                          <button
+                            onClick={() => updateContactStatus(contact.id, 'completed')}
+                            className="w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors text-sm font-medium"
+                          >
+                            Завершить
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteContact(contact.id)}
+                          className="w-full px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 active:bg-red-800 transition-colors text-sm font-medium"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
