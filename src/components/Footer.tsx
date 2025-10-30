@@ -67,7 +67,6 @@ export function Footer() {
                 className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
                 aria-label="Адрес на 2ГИС"
               >
-                {/* увеличен размер иконки */}
                 <MapPin size={37} style={{ color: 'var(--color-gold)' }} />
                 <span>Baytik Tower, ул. Байтик баатыра, 66/1 стр; ул. Радищева, 28, Бишкек</span>
               </a>
@@ -108,7 +107,7 @@ export function Footer() {
             </h4>
             <div className="space-y-4">
               <a
-                href="https://wa.me/996507909567"
+                href="https://wa.me/996507909567?text=Здравствуйте,%20интересуюсь%20услугами%20мебели%20от%20Mono%20House"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
@@ -117,7 +116,7 @@ export function Footer() {
                 <span>0507909567</span>
               </a>
               <a
-                href="https://wa.me/996500914700"
+                href="https://wa.me/996500914700?text=Здравствуйте,%20интересуюсь%20услугами%20мебели%20от%20Mono%20House"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
