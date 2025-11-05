@@ -623,52 +623,61 @@ export function Admin() {
   const uploadFiles = async (files: File[]) => {
     setUploading(true);
     console.log('Starting upload for', files.length, 'files');
-
+  
+    // фильтр webp + проверка размера ≤ 250 KB
+    const validFiles = files.filter(file => {
+      const isWebp = file.type === 'image/webp' || file.name.toLowerCase().endsWith('.webp');
+      const isSizeOk = file.size <= 250 * 1024;
+      return isWebp && isSizeOk;
+    });
+  
+    if (validFiles.length === 0) {
+      alert('Нет файлов подходящего формата или размера (только .webp до 250 KB)');
+      setUploading(false);
+      return;
+    }
+  
     let maxOrder = images.length > 0
       ? Math.max(...images.map(img => img.display_order))
       : 0;
-
-    for (const file of files) {
+  
+    for (const file of validFiles) {
       try {
-        console.log('Uploading file:', file.name, 'Size:', file.size);
-
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        
-        console.log('Generated filename:', fileName);
-
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+  
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('portfolio')
           .upload(fileName, file, {
             cacheControl: '3600',
-            upsert: false
+            upsert: false,
           });
-
+  
         if (uploadError) throw uploadError;
-
+  
         const { data: { publicUrl } } = supabase.storage
           .from('portfolio')
           .getPublicUrl(fileName);
-
+  
         maxOrder += 1;
-
-        const { data: dbData, error: dbError } = await supabase
+  
+        const { error: dbError } = await supabase
           .from('portfolio_images')
-          .insert([{ image_url: publicUrl, display_order: maxOrder }])
-          .select();
-
+          .insert([{ image_url: publicUrl, display_order: maxOrder }]);
+  
         if (dbError) throw dbError;
-
-        console.log('✅ Successfully uploaded:', file.name);
+  
+        console.log('✅ Uploaded:', file.name);
       } catch (error: any) {
-        console.error('❌ Error uploading file:', error);
+        console.error('❌ Upload error:', error);
         alert(`Ошибка при загрузке "${file.name}": ${error.message || JSON.stringify(error)}`);
       }
     }
-
+  
     setUploading(false);
     await fetchImages();
   };
+  
+  
 
   const handleDelete = async (id: string) => {
     if (!confirm('Удалить это изображение?')) return;
@@ -892,7 +901,7 @@ export function Admin() {
                         : 'Выберите или перетащите изображения сюда'}
                     </p>
                     <p className="text-xs sm:text-sm text-gray-500">
-                      {isMobile ? 'Можно выбрать несколько' : 'Поддерживаются PNG, JPG, WEBP'}
+                      {isMobile ? 'Можно выбрать несколько' : 'Поддерживается WEBP, максимальный размер 250КБ'}
                     </p>
                   </>
                 )}
