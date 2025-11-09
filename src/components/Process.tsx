@@ -2,21 +2,47 @@ import { motion } from 'framer-motion';
 import { MessageCircle, Ruler, Palette, Package, Truck } from 'lucide-react';
 
 const steps = [
-  { icon: MessageCircle, title: 'Консультация', description: 'Обсуждаем ваши пожелания и требования' },
-  { icon: Ruler, title: 'Замеры', description: 'Делаем точные замеры и составляем план' },
-  { icon: Palette, title: 'Дизайн', description: 'Подбираем мебель или разрабатываем дизайн' },
-  { icon: Package, title: 'Производство', description: 'Создаём или закупаем мебель' },
-  { icon: Truck, title: 'Доставка', description: 'Привозим и устанавливаем' },
+  {
+    icon: MessageCircle,
+    title: 'Консультация',
+    description: 'Обсуждаем ваши пожелания и требования',
+  },
+  {
+    icon: Ruler,
+    title: 'Замеры',
+    description: 'Делаем точные замеры и составляем план',
+  },
+  {
+    icon: Palette,
+    title: 'Дизайн',
+    description: 'Подбираем мебель или разрабатываем дизайн',
+  },
+  {
+    icon: Package,
+    title: 'Производство',
+    description: 'Создаём или закупаем мебель',
+  },
+  {
+    icon: Truck,
+    title: 'Доставка',
+    description: 'Привозим и устанавливаем',
+  },
 ];
 
 export function Process() {
   return (
     <section
       id="process"
-      className="py-20 sm:py-16"
+      className="py-16 sm:py-20"
       style={{ backgroundColor: 'var(--color-light-bg)' }}
     >
+      {/* SEO‑H2 – первый элемент в секции */}
+      <h2 className="sr-only">
+        Процесс работы Mono House — от консультации до установки мебели в Бишкеке
+      </h2>
+
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        {/* Визуальный заголовок (не H2) */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -24,13 +50,19 @@ export function Process() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 sm:mb-16"
         >
-          <h2
+          <div
             className="text-3xl sm:text-4xl mb-4"
-            style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}
+            style={{
+              color: 'var(--color-charcoal)',
+              fontFamily: 'Playfair Display, serif',
+            }}
           >
             Как мы работаем
-          </h2>
-          <p className="text-base sm:text-lg" style={{ color: 'var(--color-text-muted)' }}>
+          </div>
+          <p
+            className="text-base sm:text-lg"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
             От идеи до установки — просто и прозрачно
           </p>
         </motion.div>
@@ -71,13 +103,20 @@ export function Process() {
                         </div>
                       </div>
                     </div>
-                    <h3
+
+                    <div
                       className="text-lg mb-1"
-                      style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}
+                      style={{
+                        color: 'var(--color-charcoal)',
+                        fontFamily: 'Playfair Display, serif',
+                      }}
                     >
                       {step.title}
-                    </h3>
-                    <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                    </div>
+                    <p
+                      className="text-sm"
+                      style={{ color: 'var(--color-text-muted)' }}
+                    >
                       {step.description}
                     </p>
                   </motion.div>
@@ -87,7 +126,7 @@ export function Process() {
           </div>
         </div>
 
-        {/* Mobile — как первые две секции */}
+        {/* Mobile — карточки */}
         <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
@@ -105,20 +144,33 @@ export function Process() {
                   style={{ borderColor: 'var(--color-gold)' }}
                 >
                   <div className="flex items-start gap-4 sm:block">
+                    {/* Иконка */}
                     <div
                       className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 sm:mb-4 transition-transform duration-300 group-hover:scale-110"
                       style={{ backgroundColor: 'var(--color-gold)' }}
                     >
-                      <Icon size={24} className="sm:w-7 sm:h-7" style={{ color: 'white' }} />
+                      <Icon
+                        size={24}
+                        className="sm:w-7 sm:h-7"
+                        style={{ color: 'white' }}
+                      />
                     </div>
+
+                    {/* Текст */}
                     <div className="flex-1">
-                      <h3
+                      <div
                         className="text-lg sm:text-xl mb-2"
-                        style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}
+                        style={{
+                          color: 'var(--color-charcoal)',
+                          fontFamily: 'Playfair Display, serif',
+                        }}
                       >
                         {step.title}
-                      </h3>
-                      <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+                      </div>
+                      <p
+                        className="text-sm leading-relaxed"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
                         {step.description}
                       </p>
                     </div>
@@ -129,14 +181,8 @@ export function Process() {
           })}
         </div>
       </div>
-      <div style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden' }}>
-  <h3>Консультация по выбору мебели и дизайна</h3>
-  <h3>Точные замеры помещений для мебели</h3>
-  <h3>Разработка индивидуального дизайна мебели</h3>
-  <h3>Производство и изготовление мебели</h3>
-  <h3>Доставка и сборка мебели на объекте</h3>
-</div>
 
+      {/* Скрытый блок полностью удалён – используется sr‑only */}
     </section>
   );
 }

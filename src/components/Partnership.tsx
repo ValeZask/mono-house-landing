@@ -5,8 +5,13 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 export function Partnership() {
   return (
     <section className="py-8 sm:py-12 bg-white relative">
+      {/* SEO H2 — первый в DOM, невидим для пользователя */}
+      <h2 className="sr-only">
+        О компании Mono House — официальный дилер Nills в Бишкеке
+      </h2>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Заголовок "О нас" */}
+        {/* Визуальный заголовок (не H2, чтобы не дублировать) */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -14,12 +19,12 @@ export function Partnership() {
           transition={{ duration: 0.6 }}
           className="text-center mb-6"
         >
-          <h2
+          <div
             className="text-3xl sm:text-4xl mb-4"
             style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}
           >
             О нас
-          </h2>
+          </div>
         </motion.div>
 
         {/* Основная информация о Mono House */}
@@ -30,7 +35,10 @@ export function Partnership() {
           transition={{ duration: 0.5 }}
           className="space-y-5"
         >
-          <p className="text-lg sm:text-xl leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+          <p
+            className="text-lg sm:text-xl leading-relaxed"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
             <span
               style={{
                 color: 'var(--color-charcoal)',
@@ -41,16 +49,19 @@ export function Partnership() {
             >
               Mono House
             </span>{' '}
-            — изготовление корпусной и мягкой мебели премиум-сегмента на заказ в Бишкеке.
-            Мы создаем индивидуальные интерьерные решения для квартир, домов, офисов и коммерческих пространств,
+            — изготовление корпусной и мягкой мебели премиум-сегмента на заказ в Бишкеке. Мы создаем
+            индивидуальные интерьерные решения для квартир, домов, офисов и коммерческих пространств,
             где каждый элемент разрабатывается специально под ваш проект.
           </p>
 
-          <p className="text-lg leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-            Полный цикл производства от проектирования до монтажа: разрабатываем дизайн,
-            изготавливаем мебель на собственном производстве, доставляем и устанавливаем
-            в вашем помещении. Работаем с элитными материалами и современными технологиями,
-            гарантируя высокое качество и долговечность каждого изделия.
+          <p
+            className="text-lg leading-relaxed"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            Полный цикл производства от проектирования до монтажа: разрабатываем дизайн, изготавливаем
+            мебель на собственном производстве, доставляем и устанавливаем в вашем помещении.
+            Работаем с элитными материалами и современными технологиями, гарантируя высокое качество и
+            долговечность каждого изделия.
           </p>
         </motion.div>
 
@@ -70,17 +81,20 @@ export function Partnership() {
         >
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
             <div className="lg:col-span-2 space-y-3">
-              <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--color-text-muted)' }}>
+              <p
+                className="text-xs tracking-widest uppercase"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
                 Официальное представительство
               </p>
 
               <div className="flex items-center gap-2">
-                <h3
+                <div
                   className="text-2xl sm:text-3xl tracking-tight"
                   style={{ color: 'var(--color-charcoal)', fontFamily: 'Playfair Display, serif' }}
                 >
                   Nills
-                </h3>
+                </div>
                 <a
                   href="https://nills.com/ru/hakkimizda/"
                   target="_blank"
@@ -100,49 +114,41 @@ export function Partnership() {
                 </a>
               </div>
 
-              <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-                Мы — официальный представитель турецкого бренда Nills в Бишкеке. 
-                Компания известна премиальной мебелью современного дизайна и высоким качеством исполнения.
+              <p
+                className="text-sm sm:text-base leading-relaxed"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                Мы — официальный представитель турецкого бренда Nills в Бишкеке. Компания известна
+                премиальной мебелью современного дизайна и высоким качеством исполнения.
               </p>
 
-              <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-                Коллекции Nills сочетают элегантность, комфорт и долговечность, создавая атмосферу уюта в каждом пространстве.
+              <p
+                className="text-sm sm:text-base leading-relaxed"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                Коллекции Nills сочетают элегантность, комфорт и долговечность, создавая атмосферу уюта
+                в каждом пространстве.
               </p>
             </div>
 
-            {/* Оптимизированная картинка через picture */}
+            {/* Изображение Nills */}
             <div className="relative overflow-hidden rounded-lg shadow-lg h-52 lg:h-52">
-<picture className="w-full h-full block">
-  <source srcSet="/images/nills.webp" media="(max-width: 720px)" type="image/webp" />
-  <img
-    src="/images/nills.webp"
-    alt="Официальное представительство Nills в Бишкеке"
-    className="w-full h-full object-cover"
-    loading="lazy"
-    width="600"
-    height="350"
-  />
-</picture>
-
+              <picture className="w-full h-full block">
+                <source srcSet="/images/nills.webp" media="(max-width: 720px)" type="image/webp" />
+                <img
+                  src="/images/nills.webp"
+                  alt="Официальное представительство Nills в Бишкеке"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  width="600"
+                  height="350"
+                />
+              </picture>
             </div>
           </div>
         </motion.div>
 
-        {/* 🔹 Скрытые SEO-теги */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '-9999px',
-            top: 'auto',
-            width: '1px',
-            height: '1px',
-            overflow: 'hidden',
-          }}
-        >
-          <h1>Мебель на заказ в Бишкеке</h1>
-          <h2>Премиум корпусная и мягкая мебель</h2>
-          <h2>Индивидуальные интерьерные решения</h2>
-        </div>
+        {/* Удалён скрытый блок с left: -9999px — больше не нужен */}
       </div>
     </section>
   );
