@@ -62,6 +62,7 @@ export function Portfolio() {
     };
   }, []);
 
+  // Prefetch следующей страницы для десктопа
   const prefetchNextPage = (pageNumber: number) => {
     const totalPages = Math.ceil(portfolioImages.length / ITEMS_PER_PAGE);
     if (prefetchedPagesRef.current.has(pageNumber) || pageNumber > totalPages) return;
@@ -90,6 +91,7 @@ export function Portfolio() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Mobile autoplay
   useEffect(() => {
     if (!isMobile || isFullscreen || portfolioImages.length === 0) return;
     const interval = setInterval(() => {
@@ -254,6 +256,7 @@ export function Portfolio() {
 
         {!isMobile ? (
           <>
+            {/* Десктоп с пагинацией */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
               {currentImages.map((image, index) => {
                 const globalIndex = startIndex + index;
@@ -277,7 +280,6 @@ export function Portfolio() {
                   </motion.div>
                 );
               })}
-              {/* Invisible placeholders to preserve grid height when fewer than 6 items */}
               {Array.from({ length: Math.max(0, ITEMS_PER_PAGE - currentImages.length) }).map((_, i) => (
                 <div
                   key={`placeholder-${i}`}
@@ -336,6 +338,7 @@ export function Portfolio() {
             )}
           </>
         ) : (
+          // 📱 Мобильный слайдер с preload ±1 слайда
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -351,16 +354,30 @@ export function Portfolio() {
               onTouchEnd={handleTouchEnd}
               style={{ WebkitUserSelect: 'none', userSelect: 'none' }}
             >
-              <div className="relative aspect-[4/3] bg-white">
-                <ImageWithFallback
-                  src={portfolioImages[currentSlide].image_url}
-                  alt={`Проект ${currentSlide + 1}`}
-                  className="w-full h-full object-cover"
-                  draggable={false}
-                />
-                <button onClick={() => handleSlideChange(currentSlide - 1, 'right')} className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-10" />
-                <button onClick={() => openFullscreen(currentSlide)} className="absolute left-1/3 top-0 bottom-0 w-1/3 cursor-pointer z-10" />
-                <button onClick={() => handleSlideChange(currentSlide + 1, 'left')} className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-10" />
+              <div className="relative aspect-[4/3] bg-white flex items-center justify-center">
+                {portfolioImages.map((image, index) => {
+                  // загружаем только текущий, предыдущий и следующий слайд
+                  const shouldLoad = [currentSlide - 1, currentSlide, currentSlide + 1].includes(index);
+                  if (!shouldLoad) return null;
+
+                  return (
+                    <ImageWithFallback
+                      key={image.id}
+                      src={image.image_url}
+                      alt={`Проект ${index + 1}`}
+                      className="absolute w-full h-full object-cover select-none transition-opacity duration-300"
+                      draggable={false}
+                      style={{
+                        opacity: index === currentSlide ? 1 : 0,
+                        zIndex: index === currentSlide ? 10 : 0,
+                      }}
+                    />
+                  );
+                })}
+
+                <button onClick={() => handleSlideChange(currentSlide - 1, 'right')} className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer z-20" />
+                <button onClick={() => openFullscreen(currentSlide)} className="absolute left-1/3 top-0 bottom-0 w-1/3 cursor-pointer z-20" />
+                <button onClick={() => handleSlideChange(currentSlide + 1, 'left')} className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer z-20" />
               </div>
             </div>
 

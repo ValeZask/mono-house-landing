@@ -140,6 +140,15 @@ export function Footer() {
           <p>© 2025 Mono House. Все права защищены</p>
         </motion.div>
       </div>
+      <div style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden' }}>
+  <h3>Контакты Mono House Бишкек</h3>
+  <h3>Электронная почта monohouse.01@gmail.com</h3>
+  <h3>Телефоны: 0507909567, 0500914700</h3>
+  <h3>Адрес: Baytik Tower, ул. Байтик баатыра, 66/1 стр; ул. Радищева, 28, Бишкек</h3>
+  <h3>Instagram @mono_house.kg</h3>
+  <h3>WhatsApp для заказа мебели</h3>
+</div>
+
     </footer>
   );
 }

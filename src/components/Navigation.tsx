@@ -6,6 +6,10 @@ export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // === Настройка прозрачности ===
+  // Меняй значение от 0 (полностью прозрачный) до 1 (непрозрачный)
+  const opacityLevel = 0.75;
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -45,14 +49,14 @@ export function Navigation() {
       }`}
       style={{
         zIndex: 9999,
-        backgroundColor: 'var(--color-light-bg)',
+        backgroundColor: `rgba(255, 255, 255, ${opacityLevel})`,
         backdropFilter: 'blur(8px)',
         pointerEvents: 'auto',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-12 sm:h-16">
-          {/* Надпись Mono House */}
+          {/* Логотип / название */}
           <button
             onClick={() => scrollToSection('#hero')}
             className="transition-colors"
@@ -105,7 +109,7 @@ export function Navigation() {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden border-t"
             style={{
-              backgroundColor: 'rgba(255,255,255,0.97)',
+              backgroundColor: `rgba(255,255,255,${opacityLevel})`,
               borderColor: 'rgba(0,0,0,0.1)',
               backdropFilter: 'blur(8px)',
               position: 'relative',
